@@ -63,7 +63,7 @@ for i in range(200):
 '''
 
 # example projection
-img = cv2.imread('data/processed/5.png', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('data/help.png', cv2.IMREAD_GRAYSCALE)
 img = img.flatten() / 255.0
 img = img - dataset.mean
 
@@ -71,20 +71,21 @@ print("image loaded:", img)
 
 # vector projections
 proj = []
-for i in range(150):
+for i in range(203):
     proj.append(np.dot(img, vecs[:, i]) / np.dot(vecs[:, i], vecs[:, i]))
 
 print("projections:", proj)
 recon = np.zeros_like(img, dtype=np.float32)
-for i in range(150):
+for i in range(203):
     recon += proj[i] * vecs[:, i]
 print("reconstruction:", recon)
-recon = recon + dataset.mean
-recon = recon.reshape(128, 128)
 
 # reconstruction error
 err = np.linalg.norm(img - recon.flatten())
 print("error:", err)
+
+recon = recon + dataset.mean
+recon = recon.reshape(128, 128)
 
 # save reconstructed image
 cv2.imwrite('data/recon2.png', recon * 255)
