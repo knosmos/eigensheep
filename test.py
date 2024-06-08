@@ -1,3 +1,7 @@
+'''
+Quantify performance of model on test set using reconstruction error and AUC-ROC
+'''
+
 import numpy as np
 import cv2
 import os

@@ -1,3 +1,7 @@
+'''
+Generate eigensheep from processed dataset
+'''
+
 import numpy as np
 import cv2
 import os
