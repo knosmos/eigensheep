@@ -15,9 +15,9 @@ def preprocess(f):
 if len(sys.argv) == 1:
     avg = np.zeros((128, 128))
 
-    for i, f in enumerate(os.listdir('data/raw')):
-        img = preprocess("raw/" + f)
-        cv2.imwrite(f'data/processed/{i}.png', img)
+    for i, f in enumerate(os.listdir('data/test/sheep/raw')):
+        img = preprocess("test/sheep/raw/" + f)
+        cv2.imwrite(f'data/test/sheep/{i}.png', img)
         avg += img
 
     avg /= len(os.listdir('data/raw'))

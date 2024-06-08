@@ -1,33 +1,42 @@
-import numpy as np
 import cv2
-from train import Dataset
+import numpy as np
+import os
+import sys
 
-dataset = Dataset('data/processed')
-dataset.load()
-mean = np.mean(dataset.data, axis=0)
+# load eigenvectors
+vecs = np.load('data/eigensheep.npy')
+print("eigensheep loaded")
 
-# load eigensheep
-eigen = []
-for i in range(30):
-    img = cv2.imread(f'data/eigen/{i}.png', cv2.IMREAD_GRAYSCALE)
-    eigen.append(img.flatten())
-
-# example projection
-img = cv2.imread('data/eigen/2.png', cv2.IMREAD_GRAYSCALE)
-img = img.flatten()
+# load image
+img = cv2.imread('data/' + sys.argv[1], cv2.IMREAD_GRAYSCALE)
+img = img.flatten() / 255.0
 img = img - dataset.mean
 
-print(img)
+print("image loaded")
 
-# vector projections
 proj = []
-for i in range(30):
-    proj.append(np.dot(img, eigen[i]) / np.dot(eigen[i], eigen[i]))
+for i in range(150):
+    proj.append(np.dot(img, vecs[:, i]) / np.dot(vecs[:, i], vecs[:, i]))
 
-print(proj)
+# build video
+video = cv2.VideoWriter('data/projections.mp4', cv2.VideoWriter_fourcc(*'XVID'), 30, (128, 128))
+
 recon = np.zeros_like(img, dtype=np.float32)
-for i in range(30):
-    recon += proj[i] * eigen[i]
+for i in range(150):
+    recon += proj[i] * vecs[:, i]
+    k = ((recon + dataset.mean).reshape(128, 128) * 255).astype(np.uint8)
+    video.write(cv2.cvtColor(k, cv2.COLOR_GRAY2BGR))
+for i in range(60):
+    video.write(cv2.cvtColor(k, cv2.COLOR_GRAY2BGR))
+video.release()
+print("reconstruction complete, video saved")
+
+# reconstruction error
+err = np.linalg.norm(img - recon.flatten())
+print("error:", err)
+
 recon = recon + dataset.mean
 recon = recon.reshape(128, 128)
-cv2.imwrite('data/recon.png', recon)
+
+# save reconstructed image
+cv2.imwrite('data/recon.png', recon * 255)
