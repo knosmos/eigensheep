@@ -63,7 +63,8 @@ for i in range(200):
 '''
 
 # example projection
-img = cv2.imread('data/help.png', cv2.IMREAD_GRAYSCALE)
+import sys
+img = cv2.imread('data/' + sys.argv[1], cv2.IMREAD_GRAYSCALE)
 img = img.flatten() / 255.0
 img = img - dataset.mean
 
@@ -71,13 +72,25 @@ print("image loaded:", img)
 
 # vector projections
 proj = []
-for i in range(203):
+for i in range(150):
     proj.append(np.dot(img, vecs[:, i]) / np.dot(vecs[:, i], vecs[:, i]))
+
+# build video
+video = cv2.VideoWriter('data/projections2.mp4', cv2.VideoWriter_fourcc(*'XVID'), 30, (128, 128))
 
 print("projections:", proj)
 recon = np.zeros_like(img, dtype=np.float32)
-for i in range(203):
+for i in range(150):
     recon += proj[i] * vecs[:, i]
+    k = ((recon + dataset.mean).reshape(128, 128) * 255).astype(np.uint8)
+    # clamp to [0, 255]
+    #cv2.imshow('Reconstruction', k)
+    #cv2.waitKey()
+    print(k)
+    video.write(cv2.cvtColor(k, cv2.COLOR_GRAY2BGR))
+for i in range(60):
+    video.write(cv2.cvtColor(k, cv2.COLOR_GRAY2BGR))
+video.release()
 print("reconstruction:", recon)
 
 # reconstruction error
