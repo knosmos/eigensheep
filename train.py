@@ -12,7 +12,7 @@ class Dataset:
     def load(self):
         for f in os.listdir('data/processed'):
             img = cv2.imread('data/processed/' + f, cv2.IMREAD_GRAYSCALE)
-            img = img.flatten()
+            img = img.flatten() / 255.0
             self.data.append(img)
         self.data = np.array(self.data)
         self.mean = np.mean(self.data, axis=0)
@@ -33,9 +33,9 @@ def covariance(dataset):
 # generate eigensheep
 def eigensheep(cov, dataset):
     # compute eigenvectors and eigenvalues of covariance matrix
-    vals, vecs = np.linalg.eig(cov)
-    vecs = np.real(vecs)
-    vals = np.real(vals)
+    vals, vecs = np.linalg.eigh(np.dot(dataset.data, dataset.data.T))
+    #vecs = np.real(vecs)
+    #vals = np.real(vals)
 
     vecs = np.dot(dataset.data.T, vecs)
 
@@ -52,29 +52,47 @@ cov = covariance(dataset)
 vals, vecs = eigensheep(cov, dataset)
 #print(vals)
 
-print(vecs)
+print("eigenvectors:", vecs)
+
+# find orthogonality
+'''
+for i in range(200):
+    for j in range(i + 1, 200):
+        dot = np.dot(vecs[:, i], vecs[:, j])
+        print(f"dot product of {i} and {j}:", dot)
+'''
 
 # example projection
-img = cv2.imread('data/processed/2.png', cv2.IMREAD_GRAYSCALE)
-img = img.flatten()
+img = cv2.imread('data/processed/5.png', cv2.IMREAD_GRAYSCALE)
+img = img.flatten() / 255.0
 img = img - dataset.mean
 
-print(img)
+print("image loaded:", img)
 
 # vector projections
 proj = []
-for i in range(50):
+for i in range(150):
     proj.append(np.dot(img, vecs[:, i]) / np.dot(vecs[:, i], vecs[:, i]))
 
-print(proj)
+print("projections:", proj)
 recon = np.zeros_like(img, dtype=np.float32)
-for i in range(50):
+for i in range(150):
     recon += proj[i] * vecs[:, i]
+print("reconstruction:", recon)
 recon = recon + dataset.mean
 recon = recon.reshape(128, 128)
-cv2.imwrite('data/recon.png', recon)
+
+# reconstruction error
+err = np.linalg.norm(img - recon.flatten())
+print("error:", err)
+
+# save reconstructed image
+cv2.imwrite('data/recon2.png', recon * 255)
 
 # generate eigensheep images
 for i in range(30):
     sheep = vecs[:, i].reshape(128, 128)
-    cv2.imwrite(f'data/eigen/{i}.png', sheep + dataset.mean.reshape(128, 128))
+    sheep += dataset.mean.reshape(128, 128)
+    # normalize to [0, 255]
+    sheep = (sheep - np.min(sheep)) / (np.max(sheep) - np.min(sheep)) * 255
+    cv2.imwrite(f'data/eigen/{i}.png', sheep)
