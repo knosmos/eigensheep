@@ -34,8 +34,9 @@ The eigensheep are the output of running PCA on the sheep dataset. Here are the 
 ### This Section Under Reconstruction
 Now, we can reconstruct an image by projecting the image onto the eigensheep. We can set the number of projections to run; experimentally, it appears that after 150 eigensheep, we can get a pretty good approximation of the images in the training set:
 
-![image](https://github.com/knosmos/eigensheep/assets/30610197/69b7b8da-0874-47de-bf8b-aaa03e836d52)
+![image](https://github.com/knosmos/eigensheep/assets/30610197/1d705a57-d57f-4326-94b3-98d3c4921a9d)
 
 On images outside of the training set, the reconstruction is poor (as intended):
 
-![image](https://github.com/knosmos/eigensheep/assets/30610197/ac60340b-e120-4301-b162-a54d3ecb2a60)
+![image](https://github.com/knosmos/eigensheep/assets/30610197/b2b1c120-398d-466f-8a47-8f818b655c68)
+
